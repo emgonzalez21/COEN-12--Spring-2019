@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+
+#define MAX_WORD_LENGTH 30
+void readF(char*fname);
+int counter=0;
+
+int main (int argc, char *argv[])//number of arguments, file name
+{
+	if (argc==1)
+	{
+		printf("No file exists\n");
+		return 1;
+	}
+	readF(argv[1]);
+
+}
+void readF(char*fname)//reads file
+{
+	FILE *fp; //file pointer
+	char filename[MAX_WORD_LENGTH];
+	int filesize;
+	
+	fp=fopen(fname, "r");
+	while (fp==NULL)//text file empty 
+	{
+		return;
+	}
+	while (fscanf(fp,"%s",filename)==1)//there is a word in the text file
+	{
+		counter++;
+	}
+	printf("Total Words\n");
+   	printf("%d\n", counter);
+	return; 
+}
+		
