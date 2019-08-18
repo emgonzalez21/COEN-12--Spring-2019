@@ -1,0 +1,205 @@
+#include <assert.h>
+#include <stdlib.h>
+#include "set.h"
+#include <string.h>
+#include <stdbool.h>
+#include <stdbool.h>
+
+#define EMPTY 0 
+#define DELETED 1
+#define FILLED 2
+ 
+
+struct set
+{
+	int count; //number of elements in the array
+	int length; //length of the array 
+	void **data; //address of the array
+	int *flags;//FLAG will either be empty, deleted, or filled
+   	int (*compare)();
+	unsigned(*hash)();	
+};SET *sp;
+
+static int search(SET *sp, void *elt, bool *found);  
+
+
+int i;
+
+//unsigned strhash(char *s)
+//{
+//	unsigned hash=0;
+
+//	while (*s != '\0')
+//		hash= 31 * hash + *s ++;
+//	return hash;
+//}
+
+//O(n)
+static int search(SET *sp, void *elt, bool *found)
+{
+	assert (sp !=NULL);
+	assert (elt !=NULL);
+	unsigned key = sp->hash(elt);//starting position	
+	int avail= -1;
+	int loc;
+	int i;
+	*found=false;
+
+	for(i=0; i<sp->length; i++)
+	{
+		loc=(key+i)%(sp->length);
+		//check if empty
+		if (sp->flags[loc]==EMPTY)
+		{
+			*found= false;
+			if (avail == -1)
+				return loc; 
+			else 
+				return avail;
+		}
+
+		//check if deleted
+		if (sp->flags[loc] ==DELETED)
+		{
+			if (avail == -1)
+				avail=loc;
+	
+		}
+		
+		//check if filled
+		if(sp->flags[loc] == FILLED)
+		{
+			if((*sp->compare) (elt, sp->data[loc])==0)
+			{
+				*found=true;	
+				return loc;
+			}
+		
+		}
+	}
+		*found = false;
+		return avail;
+
+}
+
+
+//return a pointer to a new set with a maximum capacity of max elements
+//O(n)
+SET *createSet(int maxElts, int (*compare)(), unsigned (*hash)())
+{
+	sp->hash= *hash;
+	sp->compare= *compare;
+	sp=(SET*)malloc(sizeof(SET)); 
+	assert(sp != NULL);
+
+	sp->length = maxElts;
+	sp->count = 0;
+	sp-> data = (void**)malloc(sizeof(void*)*maxElts);
+	assert(sp->data != NULL);
+	sp->flags = malloc(sizeof(char)*maxElts);
+	assert(sp->flags !=NULL);
+		
+	for(i=0; i< maxElts; i++)
+		sp->flags[i]= EMPTY; 	
+   	
+	return sp; 
+}
+
+//deallocate memory associated with the set pointed to by sp
+//O(n)
+void destroySet(SET *sp)
+{
+	assert(sp != NULL);
+	//for (i=0; i< sp->length; i++)
+//	{
+//			if (sp->flags[i] ==FILLED)
+//				free(sp-> data[i]); //free the memory pointed to i entries
+//	}
+	free(sp->data);//free data
+	free(sp);//free pointer
+	free(sp->flags); //free flags 
+	return; 
+
+}
+
+//return the number of elements in the set pointed to by sp
+//O(n)
+int numElements (SET *sp)
+{
+	assert(sp != NULL);
+	return sp->count;
+}
+
+//add elt to the set pointed to by sp
+//O(n)
+void addElement(SET *sp, void *elt)
+{
+	assert (sp !=NULL);
+	assert (elt !=NULL);
+	bool found;  
+	int loc = search(sp, elt, &found);
+
+	if (!found)//not empty	
+	{
+//		elt=strdup(elt);	 
+		sp->data[loc]=elt;
+		sp->flags[loc]=FILLED;
+		sp->count+=1;	
+	}
+	return;
+}
+
+//remove elt from the set pointed to by sp
+//O(n)
+void removeElement(SET *sp, void *elt)
+{
+	assert(sp != NULL);
+	assert(elt !=NULL); 
+	bool found;
+	int loc= search(sp, elt, &found);
+
+	if (found) //location exists ;
+	{
+//		free(sp->data[loc]);//finds location of element and free it
+		sp->count-=1;
+		sp->flags[loc]=DELETED;	
+	}
+	return;
+}
+
+//if elt is present in the set pointed to by sp then return the matching element, otherwise return NULL
+//O(n)
+void *findElement(SET *sp,void *elt)
+{
+	bool found;
+	assert (sp !=NULL);
+	assert (elt !=NULL);
+	int loc=search(sp,elt, &found);	
+	if (!found)	
+		return NULL;	
+	return sp->data[loc];
+	
+		
+}
+
+//allocate and return an array of elements in the set pointed to by sp
+//O(n)
+void *getElements(SET *sp)
+{
+	int j=0;
+	assert(sp !=NULL);
+	void ** data2;
+	data2 = malloc(sizeof(void*)*sp->length);
+	assert (data2 !=NULL);
+	for(i=0; i<sp->length; i++)
+	{
+
+			if(sp->flags[i]==FILLED)
+			{
+				data2[j]=sp->data[i];
+				j++;
+			}
+					
+	} 
+	return data2;	
+}
