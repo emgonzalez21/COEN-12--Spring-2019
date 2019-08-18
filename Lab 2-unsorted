@@ -1,0 +1,102 @@
+#include <assert.h>
+#include <stdlib.h>
+#include "set.h"
+#include <string.h>
+struct set
+{
+	int count; //number of elements in the array
+	int length; //length of the array 
+	char **data; //address of the array
+};SET *sp;
+int i;
+
+//sequential search--> O(n)
+static int search(SET *sp, char *elt)
+{
+	for (i=0;i<sp->count; i++)
+	{
+	  if (strcmp (sp->data[i], elt)==0)
+		return i;
+	}
+	return -1;	
+}
+
+//return a pointer to a new set with a maximum capacity of max elements
+SET *createSet(int maxElts)
+{
+	SET* sp; //set pointer
+	sp=malloc(sizeof(SET)); 
+	assert(sp != NULL);
+
+	sp->length = maxElts;
+	sp->count = 0;
+	sp-> data = malloc(sizeof(char*) *maxElts);
+	assert(sp->data != NULL);
+	return sp; 
+}
+
+//deallocate memory associated with the set pointed to by sp
+void destroySet(SET *sp)
+{
+	assert(sp != NULL);
+	for (i=0; i< sp->count; i++)
+			free(sp-> data[i]); //free the memory pointed to i entries
+	free(sp->data);//free data
+	free(sp);//free pointer
+}
+
+//return the number of elements in the set pointed to by sp
+int numElements (SET *sp)
+{
+	assert(sp != NULL);
+	return sp->count;
+}
+
+//add elt to the set pointed to by sp--> O(n)
+void addElement(SET *sp, char *elt)
+{
+	char *elt2;
+	assert (sp != NULL);
+	if (search(sp,elt)==-1)
+	{
+		 elt2 = strdup(elt);
+		 sp->data[sp->count]=elt2;
+		 sp->count+=1;
+	}	 
+}
+
+//removes elt from the set pointed to by sp-->O(n)
+void removeElement(SET *sp, char *elt)
+{
+	assert(sp != NULL);
+	int loc= search(sp, elt);
+	if (loc != -1) //location exists ;
+	{
+		free(sp->data[loc]);//finds location of element and free it
+		sp->data[loc]= sp->data[sp->count-1];//changes the value of the element freed to that last element
+		sp->count-=1; 
+	}
+}
+
+//if elt is present in the set pointed to by sp then return the matching element, otherwise return NULL
+char *findElement(SET *sp, char *elt)
+{
+	assert (sp !=NULL);
+	for (i=0; i<sp->count; i++)
+	{
+		if (strcmp(sp->data[i],elt)==0)
+			return sp->data[i];
+	}
+	return NULL;
+}
+
+//allocate and return an array of elements in the set pointed to by sp
+char **getElements(SET *sp)
+{
+	assert(sp !=NULL);
+	char ** data2;
+	data2 = malloc(sizeof(char*)*sp->length);
+	memcpy(data2, sp->data,sizeof(data2)*sp->length); 
+	return data2;
+		
+}
